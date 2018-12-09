@@ -12,7 +12,7 @@ pthread_cond_t  cv;
 
 Drone *drones=NULL,*dronesaux = NULL;
 REQ *encomenda;
-int ORDER_NO;
+long ORDER_NO;
 
 int W;
 int D;
@@ -117,7 +117,7 @@ int pipeini(void){
                 
                 time ( &rawtime );
                 timeinfo = localtime ( &rawtime );
-                printf("%d:%d:%d Encomenda %s-%d recebida pela Central\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[ORDER_NO].nome,ORDER_NO);
+                printf("%d:%d:%d Encomenda %s-%ld recebida pela Central\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[ORDER_NO].nome,ORDER_NO);
                 
                 sem_wait(mutex);
                 FILE *logC = fopen("log.txt", "a");
@@ -125,7 +125,7 @@ int pipeini(void){
                     printf("Não foi possível abrir o ficheiro de log");
                     exit(EXIT_FAILURE);
                 }
-                fprintf(logC,"%d:%d:%d Encomenda %s-%d recebida pela Central\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[ORDER_NO].nome,ORDER_NO);
+                fprintf(logC,"%d:%d:%d Encomenda %s-%ld recebida pela Central\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[ORDER_NO].nome,ORDER_NO);
                 fclose(logC);
                 sem_post(mutex);
                 ORDER_NO++;
@@ -205,7 +205,7 @@ int pipeini(void){
 
 //INICIO DOS DRONES
 
-int movimenta_drones(double *ax, double *ay, double t_x, double t_y, int max_attempts,int id_enc){
+int movimenta_drones(double *ax, double *ay, double t_x, double t_y, int max_attempts,long id_enc){
     int i, result;
     for(i = 0; i< max_attempts; i++){
         result = move_towards(ax, ay, t_x, t_y);
@@ -364,7 +364,7 @@ void *drone_start(void *drone){
 //                    printf("5:o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    printf("%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     
                     sem_wait(mutex);
                     FILE *logC = fopen("log.txt", "a");
@@ -372,7 +372,7 @@ void *drone_start(void *drone){
                         printf("Não foi possível abrir o ficheiro de log");
                         exit(EXIT_FAILURE);
                     }
-                    fprintf(logC,"%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    fprintf(logC,"%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     fclose(logC);
                     sem_post(mutex);
                     
@@ -467,7 +467,7 @@ void alteraDrone(int NewD){
 }
 
 //------------- ESCOLHA DO DRONE -------------------------------------------------------------
-int escolheDrone(int W,int id_REQ){
+int escolheDrone(int W,long id_REQ){
     
     int rtd,verifica_stock=-1;
     int rtl,droneId=-1;
@@ -531,7 +531,7 @@ int escolheDrone(int W,int id_REQ){
                 printf("Não foi possível abrir o ficheiro de log");
                 exit(EXIT_FAILURE);
             }
-            fprintf(logC,"%d:%d:%d Encomenda %s-%d enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[id_REQ].nome,id_REQ,droneId);
+            fprintf(logC,"%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[id_REQ].nome,id_REQ,droneId);
             fclose(logC);
             sem_post(mutex);
             
@@ -650,7 +650,7 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
     threads();
     
     //------------------PIPE-----------------------------------------------------------------------------------------------------------------------------------
-    int aux;
+    long aux;
     int aux1;
     Reserva *reserva=NULL;
     Reserva *reserva_aux=NULL;
@@ -694,14 +694,14 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
         pipeini();
         
         if(aux!=ORDER_NO){
-            for(int i=aux;i<ORDER_NO;i++){
+            for(long i=aux;i<ORDER_NO;i++){
                 
                 aux1=escolheDrone(W,i);
                 if(aux1==-1){
                     
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%d suspensa por falta de stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i);
+                    printf("%d:%d:%d Encomenda %s-%ld suspensa por falta de stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i);
                     
                     sem_wait(mutex);
                     FILE *logC = fopen("log.txt", "a");
@@ -709,7 +709,7 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
                         printf("Não foi possível abrir o ficheiro de log");
                         exit(EXIT_FAILURE);
                     }
-                    fprintf(logC,"%d:%d:%d Encomenda %s-%d suspensa por falta de stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i);
+                    fprintf(logC,"%d:%d:%d Encomenda %s-%ld suspensa por falta de stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i);
                     fclose(logC);
                     sem_post(mutex);
                     
@@ -734,11 +734,11 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
                     }
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%d enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
+                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
                 } else{
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%d enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
+                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
                 }
             }
         }
