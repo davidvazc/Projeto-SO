@@ -9,7 +9,7 @@ int SHM_em;
 memStat* esta;
 Armazens* shm;
 
-
+sem_t *sem_arma;
 sem_t *mutex;
 
 time_t rawtime;
@@ -85,9 +85,14 @@ void criaArmazens(long i, int tempo){
             fclose(log);
             sem_post(mutex);
             
+            sem_wait(sem_arma);
+            for(int j=0;i<3;i++){
+                if(strcmp(pedido.Prod.nome[0], shm[i].Prod.nome[j])==0)
+                shm[i].Prod.nr[j]+=20;
+            }
+            sem_post(sem_arma);
             
             
-            //ATUALIZAR O STOCK EM FUNÇÃO DA MENSAGEM
             pedido.mtype=MAXREQ*2;
             msgsnd(MQm, &pedido, sizeof(droneMQ)-sizeof(long), 0);
         }
@@ -109,7 +114,13 @@ int main(int argc, char const *argv[]){
     signal(SIGABRT,SIG_IGN);
     signal(SIGINT,sigint);
     //
-    
+    sem_unlink("semArmazem");
+    sem_arma= sem_open("semArmazem",O_CREAT,0700,1);
+    if(sem_arma == SEM_FAILED){
+        perror("Não foi possível criar semáforo");
+        sem_unlink("semArmazem");
+        exit(-1);
+    }
     //------------------ CRIAR LOG -----------------------------------------------------------------------------------------------------------------------------------------
     /* create, initialize semaphore */
     

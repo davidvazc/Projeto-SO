@@ -27,9 +27,9 @@ int SHM_e;
 
 int fd;
 
-sem_t *semWarehouse;
-sem_t *pedidos_espera;
-sem_t *repouso_drones;
+sem_t *sem_stats;
+
+
 
 
 
@@ -568,20 +568,14 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
     
     
     encomenda=malloc(sizeof(REQ)*MAXREQ);
-    
-    semWarehouse= sem_open("semArmazem",O_CREAT,0644,1);
-    if(semWarehouse == SEM_FAILED){
+    sem_unlink("semArmazem");
+    sem_stats= sem_open("semEstatistica",O_CREAT,0700,1);
+    if(sem_stats == SEM_FAILED){
         perror("Não foi possível criar semáforo");
         sem_unlink("semArmazem");
         exit(-1);
     }
     
-    pedidos_espera= sem_open("semArmazem",O_CREAT,0644,1);
-    if(pedidos_espera == SEM_FAILED){
-        perror("Não foi possível criar semáforo");
-        sem_unlink("semArmazem");
-        exit(-1);
-    }
     
     mutex = sem_open(SEM_NAME,0,0644,0);
     if(mutex == SEM_FAILED)
@@ -591,12 +585,7 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
         exit(-1);
     }
     
-    repouso_drones=sem_open("espera",O_CREAT,0644,1);
-    if(repouso_drones == SEM_FAILED){
-        perror("Não foi possível criar semáforo");
-        sem_unlink("semArmazem");
-        exit(-1);
-    }
+    
     W=n_armazens;
     
     //------------------ MAPEAR SHARED MEMORY ----------------------------------------------------------------------------------------------------------------------------------
@@ -679,26 +668,30 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
     while(!termina){
         
         aux=ORDER_NO;
-        //        if(reserva!=NULL){
-        //            Reserva * current = reserva;
-        //            while (current != NULL) {
-        //                aux1=escolheDrone(W,current->val);
-        //                if(aux1==-1){
-        //                } else if(aux1==-2){
-        //                    printf("\nNão existem drones disponíveis!\n");
-        //                    while(escolheDrone(W,current->val)==aux1){
-        //                        sleep(1);
-        //                    }
-        //                    printf("\nNova encomendas %d, o drone escolhido é o %ld\n",ORDER_NO,aux1);
-        //                    sem_post(pedidos_espera);
-        //                } else{
-        //                    printf("\nNova encomendas %d, o drone escolhido é o %ld\n",ORDER_NO,aux1);
-        //                    sem_post(pedidos_espera);
-        //                }
-        //
-        //                current = current->next;
-        //            }
-        //        }
+                /*if(reserva!=NULL){
+                    Reserva * current = reserva;
+                    while (current != NULL) {
+                        aux1=escolheDrone(W,current->val);
+                        if(aux1==-1){
+                        } else if(aux1==-2){
+                            printf("\nNão existem drones disponíveis!\n");
+                            while(escolheDrone(W,current->val)==aux1){
+                                sleep(1);
+                            }
+                            time ( &rawtime );
+                            timeinfo = localtime ( &rawtime );
+                            printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[current->val].nome,current->val,aux1);
+                            
+                        } else{
+                            time ( &rawtime );
+                            timeinfo = localtime ( &rawtime );
+                            printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[current->val].nome,current->val,aux1);
+                            
+                        }
+        
+                        current = current->next;
+                    }
+                }*/
         
         pipeini();
         
