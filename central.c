@@ -364,7 +364,7 @@ void *drone_start(void *drone){
 //                    printf("5:o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    printf("%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     
                     sem_wait(mutex);
                     FILE *logC = fopen("log.txt", "a");
@@ -372,7 +372,7 @@ void *drone_start(void *drone){
                         printf("Não foi possível abrir o ficheiro de log");
                         exit(EXIT_FAILURE);
                     }
-                    fprintf(logC,"%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    fprintf(logC,"%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     fclose(logC);
                     sem_post(mutex);
                     
