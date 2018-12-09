@@ -34,12 +34,12 @@ void my_handler(int signum){
     
 }
 
-void criaArmazens(int i, int tempo){
+void criaArmazens(long i, int tempo){
     droneMQ pedido;
     
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
-    printf("Processo do Armazém %d criado com o PID: %i\n",i, getpid());
+    printf("Processo do Armazém %ld criado com o PID: %i\n",i, getpid());
     sem_wait(mutex);
     FILE *log = fopen("log.txt", "a");
     if (log == NULL){
@@ -47,7 +47,7 @@ void criaArmazens(int i, int tempo){
         exit(EXIT_FAILURE);
     }
 
-    fprintf(log,"%d:%d:%d Processo do Armazém %d criado com o PID: %i\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i, getpid());
+    fprintf(log,"%d:%d:%d Processo do Armazém %ld criado com o PID: %i\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i, getpid());
     fclose(log);
     sem_post(mutex);
     
@@ -74,14 +74,14 @@ void criaArmazens(int i, int tempo){
             //função que recebe as encomendas
             time ( &rawtime );
             timeinfo = localtime ( &rawtime );
-            printf("%d:%d:%d Armazém %d recebeu novo stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i);
+            printf("%d:%d:%d Armazém %ld recebeu novo stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i);
             sem_wait(mutex);
             log = fopen("log.txt", "a");
             if (log == NULL){
                 printf("Não foi possível abrir o ficheiro de log");
                 exit(EXIT_FAILURE);
             }
-            fprintf(log,"%d:%d:%d Armazém %d recebeu novo stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i);
+            fprintf(log,"%d:%d:%d Armazém %ld recebeu novo stock\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,i);
             fclose(log);
             sem_post(mutex);
             
@@ -286,7 +286,7 @@ int main(int argc, char const *argv[]){
     
     
     //------------------TERMINA OS PROCESSOS-----------------------------------------------------------------------------------------------------------------------------------
-    int robin=1;
+    long robin=1;
     time ( &rawtime );
     timeinfo = localtime ( &rawtime );
     while(!done){
