@@ -39,7 +39,7 @@
 
 
 typedef struct reserva {
-    int val;
+    long val;
     struct reserva* next;
 } Reserva;
 
@@ -72,18 +72,18 @@ typedef struct stats{
 
 typedef struct drone {
     pthread_t thread_id;
-    int dID;
+    long dID;
     struct xy_double local;
     bool ocupado;
     struct xy_double dest;
     int estado;
-    int encomenda;
+    long encomenda;
     int armazem;
     struct drone* proximo;
 } Drone;
 
 typedef struct encomenda{
-    int ORDER_NO;
+    long ORDER_NO;
     char nome[SIZENAMES];
     struct prod produto;
     struct xy_double destino;
@@ -94,8 +94,8 @@ typedef struct encomenda{
 
 typedef struct {
     long mtype;
-    int id_REQ;
-    int drone;
+    long id_REQ;
+    long drone;
     bool gestor;
     int tempo;
     struct prod Prod;

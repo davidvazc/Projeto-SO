@@ -221,7 +221,7 @@ int movimenta_drones(double *ax, double *ay, double t_x, double t_y, int max_att
     return 0;
 }
 
-int proximidade_base(double ax, double ay,int drone){
+int proximidade_base(double ax, double ay,long drone){
     
     int base=1;
     int resultado=distance(ax, ay, 0, MAXSIMULATIONSIZE);
@@ -308,7 +308,7 @@ void *drone_start(void *drone){
                 result=movimenta_drones(&my_data->local.x, &my_data->local.y, warehouse[Arma].XY.x, warehouse[Arma].XY.y, MAXATTEMPS,my_data->encomenda);
 //                printf("3.1 o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
                 if(result<0){
-                    printf("\nERRO: O drone %d não chegou ao seu destino!\n",my_data->dID);
+                    printf("\nERRO: O drone %ld não chegou ao seu destino!\n",my_data->dID);
                     printf("Ficou parado na posição (%f,%f).\n",my_data->local.x,my_data->local.y);
                     my_data->estado=1;
                 }
@@ -337,7 +337,7 @@ void *drone_start(void *drone){
                 
                 result = movimenta_drones(&my_data->local.x, &my_data->local.y, encomenda[my_data->encomenda].destino.x, encomenda[my_data->encomenda].destino.y,MAXATTEMPS,my_data->encomenda);
                 if(result<0){
-                    printf("\nERRO: O drone %d não chegou ao seu destino!\n",my_data->dID);
+                    printf("\nERRO: O drone %ld não chegou ao seu destino!\n",my_data->dID);
                     printf("Ficou parado na posição (%f,%f).\n",my_data->local.x,my_data->local.y);
                     my_data->estado=1;
                 }
@@ -354,7 +354,7 @@ void *drone_start(void *drone){
                 result=proximidade_base(my_data->local.x, my_data->local.y,my_data->dID);
                 
                 if(result<0){
-                    printf("\nERRO: O drone %d não chegou ao seu destino!\n",my_data->dID);
+                    printf("\nERRO: O drone %ld não chegou ao seu destino!\n",my_data->dID);
                     printf("Ficou parado na posição (%f,%f).\n",my_data->local.x,my_data->local.y);
                     my_data->estado=1;
                 } else if (result == 2){
@@ -364,7 +364,7 @@ void *drone_start(void *drone){
 //                    printf("5:o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    printf("%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     
                     sem_wait(mutex);
                     FILE *logC = fopen("log.txt", "a");
@@ -372,7 +372,7 @@ void *drone_start(void *drone){
                         printf("Não foi possível abrir o ficheiro de log");
                         exit(EXIT_FAILURE);
                     }
-                    fprintf(logC,"%d:%d:%d Encomenda %s-%d entregue no destino pelo drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
+                    fprintf(logC,"%d:%d:%d Encomenda %s-%ld entregue no destino pelo drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[my_data->encomenda].nome,my_data->encomenda,my_data->dID);
                     fclose(logC);
                     sem_post(mutex);
                     
@@ -467,10 +467,11 @@ void alteraDrone(int NewD){
 }
 
 //------------- ESCOLHA DO DRONE -------------------------------------------------------------
-int escolheDrone(int W,long id_REQ){
+long escolheDrone(int W,long id_REQ){
     
     int rtd,verifica_stock=-1;
-    int rtl,droneId=-1;
+    int rtl;
+    long droneId=-1;
     int drone_escolhido,armazem_escolhido=0,K=0;
     int distancia_total=MAXSIMULATIONSIZE*2;
     for(int i=0;i<W;i++){
@@ -531,7 +532,7 @@ int escolheDrone(int W,long id_REQ){
                 printf("Não foi possível abrir o ficheiro de log");
                 exit(EXIT_FAILURE);
             }
-            fprintf(logC,"%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[id_REQ].nome,id_REQ,droneId);
+            fprintf(logC,"%d:%d:%d Encomenda %s-%ld enviada ao drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[id_REQ].nome,id_REQ,droneId);
             fclose(logC);
             sem_post(mutex);
             
@@ -651,7 +652,7 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
     
     //------------------PIPE-----------------------------------------------------------------------------------------------------------------------------------
     long aux;
-    int aux1;
+    long aux1;
     Reserva *reserva=NULL;
     Reserva *reserva_aux=NULL;
     
@@ -734,11 +735,11 @@ void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armaz
                     }
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
+                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
                 } else{
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %d\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
+                    printf("%d:%d:%d Encomenda %s-%ld enviada ao drone %ld\n",timeinfo->tm_hour,timeinfo->tm_min,timeinfo->tm_sec,encomenda[i].nome,i,aux1);
                 }
             }
         }
