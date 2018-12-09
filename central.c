@@ -104,16 +104,18 @@ int pipeini(void){
                 i++;
             }
             if(valida_msg(auxRead)==0){
-                encomenda[ORDER_NO].ORDER_NO=ORDER_NO;
+                
                 char* str = "Prod_";
                 char dest[SIZENAMES];
                 strcpy( dest, str );
                 strcat( dest, auxRead[3] );
                 strncpy(encomenda[ORDER_NO].produto.nome[0],dest,SIZENAMES);
+                strncpy(encomenda[ORDER_NO].nome,auxRead[1],SIZENAMES);
                 encomenda[ORDER_NO].produto.nr[0]=atoi(auxRead[4]);
                 encomenda[ORDER_NO].destino.x=atoi(auxRead[6]);
                 encomenda[ORDER_NO].destino.y=atoi(auxRead[7]);
-                strncpy(encomenda[ORDER_NO].nome,auxRead[1],SIZENAMES);
+                encomenda[ORDER_NO].ORDER_NO=ORDER_NO;
+                
                 
                 time ( &rawtime );
                 timeinfo = localtime ( &rawtime );
@@ -296,7 +298,11 @@ void *drone_start(void *drone){
         switch(my_data->estado){
             case 1: // Repouso
                 
-                pthread_cond_wait(&cv, &thread_mutex);
+                
+                    pthread_cond_wait(&cv, &thread_mutex);
+                
+                
+                
                 
                 break;
             case 2: // Deslocação para carregamento
@@ -304,9 +310,10 @@ void *drone_start(void *drone){
                 Arma=my_data->armazem-1;
                 
                 my_data->ocupado=true;
-//                printf("3 o drone esta em (%f,%f) e vai para (%d,%d)\n",my_data->local.x,my_data->local.y,warehouse[Arma].XY.x,warehouse[Arma].XY.y);
+                //printf("2 o drone esta em (%f,%f) e vai para (%d,%d)\n",my_data->local.x,my_data->local.y,warehouse[Arma].XY.x,warehouse[Arma].XY.y);
+
                 result=movimenta_drones(&my_data->local.x, &my_data->local.y, warehouse[Arma].XY.x, warehouse[Arma].XY.y, MAXATTEMPS,my_data->encomenda);
-//                printf("3.1 o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
+                //printf("2.1 o dorne está em (%f,%f)\n",my_data->local.x,my_data->local.y);
                 if(result<0){
                     printf("\nERRO: O drone %ld não chegou ao seu destino!\n",my_data->dID);
                     printf("Ficou parado na posição (%f,%f).\n",my_data->local.x,my_data->local.y);
@@ -318,6 +325,7 @@ void *drone_start(void *drone){
                 }
                 break;
             case 3: // Carregamento
+                //printf("3\n");
                 aux_mq=(long)my_data->armazem;
                 pedido.mtype=aux_mq;
                 pedido.id_REQ=my_data->encomenda;
@@ -381,8 +389,8 @@ void *drone_start(void *drone){
                 }
                 break;
         }
-        
         pthread_mutex_unlock(&thread_mutex);
+        
         
     }
     pthread_exit(NULL);
@@ -536,7 +544,7 @@ long escolheDrone(int W,long id_REQ){
             fclose(logC);
             sem_post(mutex);
             
-            pthread_cond_signal(&cv);
+            pthread_cond_broadcast(&cv);
         }
         current=current->proximo;
     }
@@ -550,7 +558,7 @@ long escolheDrone(int W,long id_REQ){
 
 
 
-//------------MAIN
+//------------MAIN--------------------------------------------------------------
 
 void central(int max_x,int max_y,int nr_drones,int S,int Q,int Tempo,int n_armazens){
     signal(SIGUSR1,sigur);
