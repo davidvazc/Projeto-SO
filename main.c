@@ -293,13 +293,14 @@ int main(int argc, char const *argv[]){
         sleep(S*Tempo);
         
         droneMQ pedido;
+        int numero=rand() % (quantidade + 1);
+        strncpy(tiposProd[numero], pedido.Prod.nome[0],SIZENAMES);
         pedido.gestor=true;
         if(robin==W+1)
             robin=1;
         pedido.mtype=robin;
         
-        int numero=rand() % (quantidade + 1);
-        strncpy(tiposProd[numero], pedido.Prod.nome[0],SIZENAMES);
+        
         pedido.Prod.nr[0]=Q;
         msgsnd(MQm, &pedido, sizeof(droneMQ)-sizeof(long), 0);
         msgrcv(MQm, &pedido, sizeof(droneMQ)-sizeof(long),MAXREQ*2, 0);
